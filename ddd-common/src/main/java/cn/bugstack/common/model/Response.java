@@ -1,4 +1,4 @@
-package cn.bugstack.types.model;
+package cn.bugstack.common.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

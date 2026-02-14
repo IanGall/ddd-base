@@ -1,4 +1,4 @@
-package cn.bugstack.types.exception;
+package cn.bugstack.common.exception;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
