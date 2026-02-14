@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>ddd-common</module>
         <module>ddd-dependencies</module>
     </modules>
 
