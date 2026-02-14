@@ -13,6 +13,7 @@
         <module>ddd-common</module>
         <module>ddd-dependencies</module>
         <module>ddd-base-bom</module>
+        <module>gateway-governance</module>
     </modules>
 
 </project>
