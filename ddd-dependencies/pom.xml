@@ -25,6 +25,7 @@
         <shardingsphere.version>5.5.2</shardingsphere.version>
         <xxl-job.version>2.4.0</xxl-job.version>
         <retrofit2.version>2.9.0</retrofit2.version>
+        <h2.version>2.3.232</h2.version>
     </properties>
 
     <dependencyManagement>
@@ -103,6 +104,11 @@
                 <groupId>com.squareup.retrofit2</groupId>
                 <artifactId>converter-gson</artifactId>
                 <version>${retrofit2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.linpeilie</groupId>
