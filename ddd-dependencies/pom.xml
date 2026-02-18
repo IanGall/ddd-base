@@ -12,7 +12,7 @@
     <properties>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
         <dubbo.version>3.3.6</dubbo.version>
-        <mybatis.spring.boot.version>3.0.5</mybatis.spring.boot.version>
+        <mybatis.spring.boot.version>4.0.1</mybatis.spring.boot.version>
         <rocketmq.spring.boot.version>2.3.5</rocketmq.spring.boot.version>
         <redisson.version>4.2.0</redisson.version>
         <fastjson.version>2.0.28</fastjson.version>
