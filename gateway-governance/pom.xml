@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>cn.bugstack</groupId>
+        <groupId>cn.iantech</groupId>
         <artifactId>ddd-base</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
@@ -15,7 +15,7 @@
 
     <properties>
         <spring.boot.version>4.0.2</spring.boot.version>
-        <xfg.std.version>1.0-SNAPSHOT</xfg.std.version>
+        <ian.std.version>1.0-SNAPSHOT</ian.std.version>
     </properties>
 
     <modules>

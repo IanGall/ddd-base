@@ -38,7 +38,7 @@ mvn verify
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>cn.bugstack</groupId>
+            <groupId>cn.iantech</groupId>
             <artifactId>ddd-base-bom</artifactId>
             <version>1.0-SNAPSHOT</version>
             <type>pom</type>

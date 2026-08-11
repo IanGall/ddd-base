@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>cn.bugstack</groupId>
+        <groupId>cn.iantech</groupId>
         <artifactId>gateway-governance</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
@@ -23,16 +23,16 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>cn.bugstack</groupId>
+                <groupId>cn.iantech</groupId>
                 <artifactId>ddd-base-bom</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>cn.bugstack</groupId>
-                <artifactId>xfg-frame-archetype-std-bom</artifactId>
-                <version>${xfg.std.version}</version>
+                <groupId>cn.iantech</groupId>
+                <artifactId>ian-frame-archetype-std-bom</artifactId>
+                <version>${ian.std.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

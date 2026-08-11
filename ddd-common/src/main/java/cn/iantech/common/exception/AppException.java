@@ -1,4 +1,4 @@
-package cn.bugstack.common.exception;
+package cn.iantech.common.exception;
 
 public class AppException extends RuntimeException {
 

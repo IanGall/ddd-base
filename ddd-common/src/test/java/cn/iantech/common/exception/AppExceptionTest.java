@@ -1,4 +1,4 @@
-package cn.bugstack.common.exception;
+package cn.iantech.common.exception;
 
 import org.junit.jupiter.api.Test;
 

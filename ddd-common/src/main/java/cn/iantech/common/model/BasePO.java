@@ -1,4 +1,4 @@
-package cn.bugstack.common.model;
+package cn.iantech.common.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
