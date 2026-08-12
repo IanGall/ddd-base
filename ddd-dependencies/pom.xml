@@ -21,7 +21,7 @@
         <xstream.version>1.4.10</xstream.version>
         <jjwt.version>0.9.1</jjwt.version>
         <java-jwt.version>4.4.0</java-jwt.version>
-        <nacos.version>2.1.0</nacos.version>
+        <nacos.version>3.2.3</nacos.version>
         <shardingsphere.version>5.5.2</shardingsphere.version>
         <xxl-job.version>2.4.0</xxl-job.version>
         <retrofit2.version>2.9.0</retrofit2.version>
