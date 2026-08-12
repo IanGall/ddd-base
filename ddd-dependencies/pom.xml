@@ -13,7 +13,8 @@
         <mapstruct-plus.version>1.5.2</mapstruct-plus.version>
         <dubbo.version>3.3.6</dubbo.version>
         <mybatis.spring.boot.version>4.1.0</mybatis.spring.boot.version>
-        <rocketmq.spring.boot.version>2.3.6</rocketmq.spring.boot.version>
+        <spring.boot.version>4.1.0</spring.boot.version>
+        <kafka.version>4.1.1</kafka.version>
         <redisson.version>4.7.0</redisson.version>
         <fastjson.version>2.0.64</fastjson.version>
         <guava.version>33.6.0-jre</guava.version>
@@ -117,9 +118,14 @@
                 <version>${xxl-job.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.rocketmq</groupId>
-                <artifactId>rocketmq-spring-boot-starter</artifactId>
-                <version>${rocketmq.spring.boot.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-kafka</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${kafka.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.linpeilie</groupId>
