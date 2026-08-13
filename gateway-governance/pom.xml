@@ -14,7 +14,6 @@
     <packaging>pom</packaging>
 
     <properties>
-        <spring.boot.version>4.1.0</spring.boot.version>
         <ian.std.version>1.0-SNAPSHOT</ian.std.version>
         <gateway.governance.version>1.0-SNAPSHOT</gateway.governance.version>
     </properties>

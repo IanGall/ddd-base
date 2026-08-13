@@ -4,29 +4,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>cn.iantech</groupId>
-    <artifactId>ddd-dependencies</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <parent>
+        <groupId>cn.iantech</groupId>
+        <artifactId>ddd-base</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
 
-    <properties>
-        <mapstruct-plus.version>1.5.2</mapstruct-plus.version>
-        <dubbo.version>3.3.6</dubbo.version>
-        <mybatis.spring.boot.version>4.1.0</mybatis.spring.boot.version>
-        <spring.boot.version>4.1.0</spring.boot.version>
-        <kafka.version>4.1.1</kafka.version>
-        <redisson.version>4.7.0</redisson.version>
-        <fastjson.version>2.0.64</fastjson.version>
-        <guava.version>33.6.0-jre</guava.version>
-        <dom4j.version>2.2.0</dom4j.version>
-        <xstream.version>1.4.21</xstream.version>
-        <nacos.version>3.2.3</nacos.version>
-        <shardingsphere.version>5.5.3</shardingsphere.version>
-        <xxl-job.version>3.4.2</xxl-job.version>
-    </properties>
+    <artifactId>ddd-dependencies</artifactId>
+    <packaging>pom</packaging>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.mybatis.spring.boot</groupId>
                 <artifactId>mybatis-spring-boot-starter</artifactId>
@@ -38,19 +33,29 @@
                 <version>${fastjson.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.dom4j</groupId>
-                <artifactId>dom4j</artifactId>
-                <version>${dom4j.version}</version>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.thoughtworks.xstream</groupId>
-                <artifactId>xstream</artifactId>
-                <version>${xstream.version}</version>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>${error.prone.annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.dubbo</groupId>
@@ -116,16 +121,6 @@
                 <groupId>com.xuxueli</groupId>
                 <artifactId>xxl-job-core</artifactId>
                 <version>${xxl-job.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-kafka</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.kafka</groupId>
-                <artifactId>kafka-clients</artifactId>
-                <version>${kafka.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.linpeilie</groupId>
