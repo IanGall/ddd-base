@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <name>DDD 基础组件</name>
-    <description>DDD 工程共享模型、依赖版本与网关构建治理</description>
+    <description>DDD 工程共享模型、依赖版本与构建治理</description>
 
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
@@ -44,7 +44,6 @@
         <module>ddd-common</module>
         <module>ddd-dependencies</module>
         <module>ddd-base-bom</module>
-        <module>gateway-governance</module>
     </modules>
 
     <build>

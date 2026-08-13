@@ -9,8 +9,6 @@
 | `ddd-common` | JAR | 提供通用响应、分页模型、持久化基类、常量和应用异常 |
 | `ddd-dependencies` | BOM | 统一第三方依赖版本，供基础 BOM 导入 |
 | `ddd-base-bom` | BOM | 汇总第三方依赖版本和 `ddd-common` 版本 |
-| `gateway-governance/gateway-platform-bom` | BOM | 汇总 Spring Boot、DDD 基础组件和业务标准工程版本 |
-| `gateway-governance/gateway-parent` | Parent POM | 为网关工程提供依赖管理和 Spring Boot 构建插件版本 |
 
 ## 构建要求
 
@@ -48,4 +46,4 @@ mvn verify
 </dependencyManagement>
 ```
 
-网关工程应继承 `gateway-parent`，统一使用平台 BOM 和构建插件版本。依赖版本只在相应 BOM 中维护，下游模块不重复声明已受管版本。
+需要统一构建约束的工程应继承 `ddd-base`，并按需导入 `ddd-base-bom`。依赖版本只在基础 BOM 中维护，下游模块不重复声明已受管版本。
