@@ -18,7 +18,7 @@
             <dependency>
                 <groupId>cn.iantech</groupId>
                 <artifactId>gateway-platform-bom</artifactId>
-                <version>${project.version}</version>
+                <version>${gateway.governance.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
