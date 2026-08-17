@@ -7,14 +7,19 @@
 | 模块 | 产物 | 职责 |
 | --- | --- | --- |
 | `ddd-common` | JAR | 提供通用响应、分页模型、持久化基类、常量和应用异常 |
+| `ddd-context` | 聚合 POM | 聚合协议无关上下文及其边界适配器，不作为业务依赖引入 |
+| `ddd-context/ddd-context-core` | JAR | 提供协议无关的请求上下文、访问器、作用域和快照能力 |
+| `ddd-context/ddd-context-dubbo` | JAR | 在 Dubbo 3 Attachment 与请求上下文之间进行转换 |
+| `ddd-context/ddd-context-web` | JAR | 在 Spring Web 请求边界建立、回写并清理请求上下文 |
 | `ddd-dependencies` | BOM | 统一第三方依赖版本，供基础 BOM 导入 |
-| `ddd-base-bom` | BOM | 汇总第三方依赖版本和 `ddd-common` 版本 |
+| `ddd-base-bom` | BOM | 汇总第三方依赖版本及基础组件版本 |
 
 ## 构建要求
 
 - JDK 21，构建时由 Maven Enforcer 强制校验。
 - Maven 3.9 或更高版本。
 - 测试默认执行；仅在明确需要时通过 `-DskipTests` 跳过。
+- 主源码和测试源码的方法名必须使用英文 lowerCamelCase，构建时由 Maven Checkstyle 强制校验。
 
 完整构建并安装到本地 Maven 仓库：
 

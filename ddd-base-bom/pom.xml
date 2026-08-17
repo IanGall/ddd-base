@@ -34,6 +34,21 @@
                 <artifactId>ddd-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>cn.iantech</groupId>
+                <artifactId>ddd-context-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.iantech</groupId>
+                <artifactId>ddd-context-dubbo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.iantech</groupId>
+                <artifactId>ddd-context-web</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

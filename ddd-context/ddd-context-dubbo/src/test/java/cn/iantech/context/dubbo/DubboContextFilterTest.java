@@ -1,0 +1,222 @@
+package cn.iantech.context.dubbo;
+
+import cn.iantech.context.core.ContextAccessor;
+import cn.iantech.context.core.ContextScope;
+import cn.iantech.context.core.RequestContext;
+import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.extension.ExtensionLoader;
+import org.apache.dubbo.rpc.AppResponse;
+import org.apache.dubbo.rpc.Filter;
+import org.apache.dubbo.rpc.Invocation;
+import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.Result;
+import org.apache.dubbo.rpc.RpcContext;
+import org.apache.dubbo.rpc.RpcInvocation;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class DubboContextFilterTest {
+
+    private final Invocation invocation = new RpcInvocation(
+            "test", "cn.iantech.TestService", "1.0.0", new Class<?>[0], new Object[0]);
+
+    // 每个测试结束后清理 Dubbo 上下文，避免测试之间相互污染
+    @AfterEach
+    void clearDubboContext() {
+        RpcContext.removeClientAttachment();
+        RpcContext.removeServerAttachment();
+    }
+
+    // 验证 Dubbo SPI 能够加载消费端和提供端上下文过滤器
+    @Test
+    void shouldLoadConsumerAndProviderFiltersThroughDubboSpi() {
+        Filter consumer = ExtensionLoader.getExtensionLoader(Filter.class)
+                .getExtension("dubboContextConsumer");
+        Filter provider = ExtensionLoader.getExtensionLoader(Filter.class)
+                .getExtension("dubboContextProvider");
+
+        assertInstanceOf(DubboContextConsumerFilter.class, consumer);
+        assertInstanceOf(DubboContextProviderFilter.class, provider);
+    }
+
+    // 验证消费端只传播白名单上下文，并在调用结束后恢复原附件
+    @Test
+    void shouldPropagateOnlyWhitelistedContextAndRestoreOriginalAttachmentsOnConsumer() {
+        RequestContext context = context("request-1", "operator", "tenant-1", "user-1",
+                "gray-a", "gateway", "zh-CN");
+        RpcContext.getClientAttachment().setAttachment(DubboContextAttachments.REQUEST_ID, "parent-request");
+        RpcContext.getClientAttachment().setAttachment("untrusted", "保留但不由上下文组件处理");
+
+        try (ContextScope ignored = ContextAccessor.open(context)) {
+            Result result = new DubboContextConsumerFilter().invoke(new CapturingInvoker(current -> {
+                assertEquals("request-1", current.get(DubboContextAttachments.REQUEST_ID));
+                assertEquals("operator", current.get(DubboContextAttachments.PRINCIPAL_NAME));
+                assertEquals("tenant-1", current.get(DubboContextAttachments.TENANT_ID));
+                assertEquals("user-1", current.get(DubboContextAttachments.USER_ID));
+                assertEquals("gray-a", current.get(DubboContextAttachments.GRAY_TAG));
+                assertEquals("gateway", current.get(DubboContextAttachments.SOURCE));
+                assertEquals("zh-CN", current.get(DubboContextAttachments.LOCALE));
+                assertFalse(DubboContextAttachments.keys().contains("untrusted"));
+            }), invocation);
+            assertEquals("ok", result.getValue());
+        }
+
+        assertEquals("parent-request",
+                RpcContext.getClientAttachment().getAttachment(DubboContextAttachments.REQUEST_ID));
+        assertEquals("保留但不由上下文组件处理",
+                RpcContext.getClientAttachment().getAttachment("untrusted"));
+    }
+
+    // 验证消费端没有当前上下文时不会传播线程残留字段
+    @Test
+    void shouldNotPropagateStaleThreadValuesWhenConsumerHasNoContext() {
+        RpcContext.getClientAttachment().setAttachment(DubboContextAttachments.USER_ID, "stale-user");
+
+        new DubboContextConsumerFilter().invoke(new CapturingInvoker(current ->
+                assertNull(current.get(DubboContextAttachments.USER_ID))), invocation);
+
+        assertEquals("stale-user",
+                RpcContext.getClientAttachment().getAttachment(DubboContextAttachments.USER_ID));
+    }
+
+    // 验证消费端丢弃包含控制字符的附件值
+    @Test
+    void shouldDiscardAttachmentValuesContainingControlCharactersOnConsumer() {
+        AtomicBoolean invoked = new AtomicBoolean();
+        RequestContext invalid = context("request\nforged", null, null, null, null, null, null);
+
+        try (ContextScope ignored = ContextAccessor.open(invalid)) {
+            new DubboContextConsumerFilter().invoke(new CapturingInvoker(current -> {
+                invoked.set(true);
+                assertNull(current.get(DubboContextAttachments.REQUEST_ID));
+            }), invocation);
+        }
+
+        assertTrue(invoked.get());
+    }
+
+    // 验证提供端读取白名单上下文，并在调用结束后恢复父上下文
+    @Test
+    void shouldReadWhitelistedContextAndRestoreParentContextOnProvider() {
+        RequestContext parent = context("parent", null, null, null, null, null, null);
+        RpcContext.getServerAttachment().setAttachment(DubboContextAttachments.REQUEST_ID, "request-2");
+        RpcContext.getServerAttachment().setAttachment(DubboContextAttachments.TENANT_ID, "tenant-2");
+        RpcContext.getServerAttachment().setAttachment("untrusted", "不读取");
+        AtomicReference<RequestContext> captured = new AtomicReference<>();
+
+        try (ContextScope ignored = ContextAccessor.open(parent)) {
+            new DubboContextProviderFilter().invoke(new CapturingInvoker(current ->
+                    captured.set(ContextAccessor.current().orElseThrow())), invocation);
+            assertEquals(parent, ContextAccessor.current().orElseThrow());
+        }
+
+        assertEquals("request-2", captured.get().requestId());
+        assertEquals("tenant-2", captured.get().tenantId());
+        assertNull(captured.get().userId());
+    }
+
+    // 验证提供端没有附件时隔离已有父上下文
+    @Test
+    void shouldIsolateParentContextWhenProviderHasNoAttachments() {
+        RequestContext parent = context("parent", null, null, null, null, null, null);
+        AtomicBoolean contextPresent = new AtomicBoolean(true);
+
+        try (ContextScope ignored = ContextAccessor.open(parent)) {
+            new DubboContextProviderFilter().invoke(new CapturingInvoker(current ->
+                    contextPresent.set(ContextAccessor.current().isPresent())), invocation);
+            assertEquals(parent, ContextAccessor.current().orElseThrow());
+        }
+
+        assertFalse(contextPresent.get());
+    }
+
+    // 验证提供端丢弃超长附件后仍继续调用业务方法
+    @Test
+    void shouldDiscardOversizedAttachmentAndContinueInvocationOnProvider() {
+        AtomicBoolean invoked = new AtomicBoolean();
+        RpcContext.getServerAttachment().setAttachment(
+                DubboContextAttachments.GRAY_TAG, "a".repeat(129));
+
+        new DubboContextProviderFilter().invoke(new CapturingInvoker(current -> {
+            invoked.set(true);
+            assertTrue(ContextAccessor.current().isEmpty());
+        }), invocation);
+
+        assertTrue(invoked.get());
+    }
+
+    // 验证提供端业务调用异常后仍能恢复父上下文
+    @Test
+    void shouldRestoreParentContextAfterProviderInvocationFails() {
+        RequestContext parent = context("parent", "caller", null, null, null, "service", null);
+        RpcContext.getServerAttachment().setAttachment(DubboContextAttachments.REQUEST_ID, "child");
+
+        try (ContextScope ignored = ContextAccessor.open(parent)) {
+            assertThrows(IllegalStateException.class, () -> new DubboContextProviderFilter().invoke(
+                    new CapturingInvoker(current -> {
+                        assertEquals("child", ContextAccessor.current().orElseThrow().requestId());
+                        throw new IllegalStateException("测试异常");
+                    }), invocation));
+            assertEquals(parent, ContextAccessor.current().orElseThrow());
+        }
+
+        assertFalse(ContextAccessor.current().isPresent());
+    }
+
+    private static RequestContext context(
+            String requestId,
+            String principalName,
+            String tenantId,
+            String userId,
+            String grayTag,
+            String source,
+            String locale
+    ) {
+        return new RequestContext(requestId, principalName, tenantId, userId, grayTag, source, locale);
+    }
+
+    private static final class CapturingInvoker implements Invoker<Object> {
+
+        private final java.util.function.Consumer<Map<String, String>> assertion;
+
+        private CapturingInvoker(java.util.function.Consumer<Map<String, String>> assertion) {
+            this.assertion = assertion;
+        }
+
+        @Override
+        public Class<Object> getInterface() {
+            return Object.class;
+        }
+
+        @Override
+        public URL getUrl() {
+            return URL.valueOf("tri://127.0.0.1:50051/cn.iantech.TestService");
+        }
+
+        @Override
+        public boolean isAvailable() {
+            return true;
+        }
+
+        @Override
+        public Result invoke(Invocation invocation) {
+            assertion.accept(RpcContext.getClientAttachment().getAttachments());
+            return new AppResponse("ok");
+        }
+
+        @Override
+        public void destroy() {
+        }
+    }
+}

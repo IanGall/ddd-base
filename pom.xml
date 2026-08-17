@@ -36,11 +36,13 @@
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <maven.surefire.plugin.version>3.5.6</maven.surefire.plugin.version>
         <maven.enforcer.plugin.version>3.6.3</maven.enforcer.plugin.version>
+        <maven.checkstyle.plugin.version>3.5.0</maven.checkstyle.plugin.version>
         <spring.boot.maven.plugin.version>${spring.boot.version}</spring.boot.maven.plugin.version>
     </properties>
 
     <modules>
         <module>ddd-common</module>
+        <module>ddd-context</module>
         <module>ddd-dependencies</module>
         <module>ddd-base-bom</module>
     </modules>
@@ -78,6 +80,11 @@
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring.boot.maven.plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${maven.checkstyle.plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -100,6 +107,35 @@
                                 <dependencyConvergence/>
                                 <requireUpperBoundDeps/>
                             </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-java-method-names</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <consoleOutput>true</consoleOutput>
+                            <failOnViolation>true</failOnViolation>
+                            <checkstyleRules>
+                                <module name="Checker">
+                                    <module name="TreeWalker">
+                                        <module name="MethodName">
+                                            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+                                            <message key="name.invalidPattern"
+                                                     value="方法名 ''{0}'' 必须使用英文 lowerCamelCase 格式。"/>
+                                        </module>
+                                    </module>
+                                </module>
+                            </checkstyleRules>
                         </configuration>
                     </execution>
                 </executions>
