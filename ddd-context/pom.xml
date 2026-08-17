@@ -14,7 +14,7 @@
     <artifactId>ddd-context</artifactId>
     <packaging>pom</packaging>
 
-    <name>DDD 上下文组件</name>
+    <name>ddd-context</name>
     <description>聚合协议无关上下文及其 Web、Dubbo 边界适配器</description>
 
     <modules>

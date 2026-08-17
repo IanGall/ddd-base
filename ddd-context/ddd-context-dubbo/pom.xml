@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>ddd-context-dubbo</artifactId>
-    <name>DDD Dubbo 上下文适配器</name>
+    <name>ddd-context-dubbo</name>
     <description>在 Dubbo 3 Attachment 与协议无关请求上下文之间进行转换</description>
 
     <properties>
