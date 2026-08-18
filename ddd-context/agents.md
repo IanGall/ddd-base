@@ -22,6 +22,7 @@
 - 统一使用 `x-ctx-*` Attachment 键；未知、空值、超长或非法字段必须忽略。
 - 禁止传播 Authorization、密码、Cookie、权限列表、完整用户对象、业务 DTO 或任意 JSON。
 - `tenantId`、`userId`、`grayTag` 等传入字段不得直接作为授权结论，权限仍由应用层校验。
+- Web 自定义认证解析器只能把可信认证配置或 Claim 映射为上下文，禁止信任外部租户、用户身份 Header。
 
 ## 变更边界
 

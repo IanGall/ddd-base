@@ -16,6 +16,7 @@ public class Constants {
         SUCCESS("0000", "成功"),
         UN_ERROR("0001", "未知失败"),
         ILLEGAL_PARAMETER("0002", "非法参数"),
+        ACCESS_DENIED("0003", "无权访问"),
         ;
 
         private String code;

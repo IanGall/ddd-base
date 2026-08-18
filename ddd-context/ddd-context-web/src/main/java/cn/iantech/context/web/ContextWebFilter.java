@@ -1,5 +1,6 @@
 package cn.iantech.context.web;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.iantech.context.core.ContextAccessor;
 import cn.iantech.context.core.ContextScope;
 import cn.iantech.context.core.ContextValidator;
@@ -8,33 +9,45 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
- * 在 Spring Security 认证完成后建立协议无关的请求上下文。
+ * 在 Sa-Token 认证完成后建立协议无关的请求上下文。
  */
 public final class ContextWebFilter extends OncePerRequestFilter {
 
     public static final String REQUEST_ID_HEADER = "X-Request-Id";
 
+    private final AuthenticationContextResolver authenticationContextResolver;
+
+    public ContextWebFilter() {
+        this(new DefaultAuthenticationContextResolver());
+    }
+
+    public ContextWebFilter(AuthenticationContextResolver authenticationContextResolver) {
+        this.authenticationContextResolver = Objects.requireNonNull(
+                authenticationContextResolver, "认证上下文解析器不能为空");
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String requestId = validOrGenerate(request.getHeader(REQUEST_ID_HEADER));
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String principalName = authentication == null || !authentication.isAuthenticated()
-                ? null : ContextValidator.validOrNull(authentication.getName());
+        String loginId = StpUtil.isLogin() ? StpUtil.getLoginIdAsString() : null;
+        ResolvedAuthenticationContext resolved = authenticationContextResolver.resolve(loginId);
+        if (resolved == null) {
+            resolved = ResolvedAuthenticationContext.empty();
+        }
 
         RequestContext context = new RequestContext(
                 requestId,
-                principalName,
-                null,
-                null,
+                resolved.principalName(),
+                resolved.tenantId(),
+                resolved.userId(),
                 null,
                 "gateway",
                 null);
