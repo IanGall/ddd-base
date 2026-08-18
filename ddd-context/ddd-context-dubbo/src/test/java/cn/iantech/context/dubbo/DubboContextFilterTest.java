@@ -5,13 +5,7 @@ import cn.iantech.context.core.ContextScope;
 import cn.iantech.context.core.RequestContext;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.extension.ExtensionLoader;
-import org.apache.dubbo.rpc.AppResponse;
-import org.apache.dubbo.rpc.Filter;
-import org.apache.dubbo.rpc.Invocation;
-import org.apache.dubbo.rpc.Invoker;
-import org.apache.dubbo.rpc.Result;
-import org.apache.dubbo.rpc.RpcContext;
-import org.apache.dubbo.rpc.RpcInvocation;
+import org.apache.dubbo.rpc.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,12 +13,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DubboContextFilterTest {
 
@@ -53,7 +42,7 @@ class DubboContextFilterTest {
     // 验证消费端只传播白名单上下文，并在调用结束后恢复原附件
     @Test
     void shouldPropagateOnlyWhitelistedContextAndRestoreOriginalAttachmentsOnConsumer() {
-        RequestContext context = context("request-1", "operator", "tenant-1", "user-1",
+        RequestContext context = context("request-1", "operator", "9223372036854775807", "9223372036854775806",
                 "gray-a", "gateway", "zh-CN");
         RpcContext.getClientAttachment().setAttachment(DubboContextAttachments.REQUEST_ID, "parent-request");
         RpcContext.getClientAttachment().setAttachment("untrusted", "保留但不由上下文组件处理");
@@ -62,8 +51,8 @@ class DubboContextFilterTest {
             Result result = new DubboContextConsumerFilter().invoke(new CapturingInvoker(current -> {
                 assertEquals("request-1", current.get(DubboContextAttachments.REQUEST_ID));
                 assertEquals("operator", current.get(DubboContextAttachments.PRINCIPAL_NAME));
-                assertEquals("tenant-1", current.get(DubboContextAttachments.TENANT_ID));
-                assertEquals("user-1", current.get(DubboContextAttachments.USER_ID));
+                assertEquals("9223372036854775807", current.get(DubboContextAttachments.TENANT_ID));
+                assertEquals("9223372036854775806", current.get(DubboContextAttachments.USER_ID));
                 assertEquals("gray-a", current.get(DubboContextAttachments.GRAY_TAG));
                 assertEquals("gateway", current.get(DubboContextAttachments.SOURCE));
                 assertEquals("zh-CN", current.get(DubboContextAttachments.LOCALE));

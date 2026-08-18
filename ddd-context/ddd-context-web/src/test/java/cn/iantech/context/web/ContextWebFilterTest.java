@@ -73,11 +73,11 @@ class ContextWebFilterTest {
         assertFalse(ContextAccessor.current().isPresent());
     }
 
-    // 验证注入的解析器可以提供受信任的配置租户，伪造请求头不会参与解析
+    // 验证注入的解析器可以恢复 64 位主账号与子账号身份，伪造请求头不会参与解析
     @Test
     void shouldUseResolverTenantAndIgnoreForgedTenantHeader() throws Exception {
         ContextWebFilter configuredFilter = new ContextWebFilter(authentication ->
-                new ResolvedAuthenticationContext("configured-admin", "1001", null));
+                new ResolvedAuthenticationContext("operator", "9223372036854775807", "9223372036854775806"));
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("X-Tenant-Id", "9999");
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -86,9 +86,9 @@ class ContextWebFilterTest {
         configuredFilter.doFilter(request, response, (ignoredRequest, ignoredResponse) ->
                 captured.set(ContextAccessor.current().orElseThrow()));
 
-        assertEquals("configured-admin", captured.get().principalName());
-        assertEquals("1001", captured.get().tenantId());
-        assertNull(captured.get().userId());
+        assertEquals("operator", captured.get().principalName());
+        assertEquals("9223372036854775807", captured.get().tenantId());
+        assertEquals("9223372036854775806", captured.get().userId());
     }
 
     // 验证未登录请求不会被误识别为可信主体
