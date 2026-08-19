@@ -52,7 +52,10 @@ public final class ContextWebFilter extends OncePerRequestFilter {
                 null,
                 null,
                 "gateway",
-                null);
+                null,
+                resolved.ownerAccountId(),
+                resolved.authorizedScope(),
+                resolved.credentialVersion());
 
         try (ContextScope ignored = ContextAccessor.open(context)) {
             response.setHeader(REQUEST_ID_HEADER, requestId);

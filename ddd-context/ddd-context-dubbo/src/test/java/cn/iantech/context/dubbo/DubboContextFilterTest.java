@@ -42,8 +42,10 @@ class DubboContextFilterTest {
     // 验证消费端只传播白名单上下文，并在调用结束后恢复原附件
     @Test
     void shouldPropagateOnlyWhitelistedContextAndRestoreOriginalAttachmentsOnConsumer() {
-        RequestContext context = context("request-1", "operator", "9223372036854775807", "9223372036854775806",
-                "gray-a", "gateway", "zh-CN");
+        RequestContext context = new RequestContext(
+                "request-1", "operator", "9223372036854775807", "9223372036854775806",
+                "CLIENT", "channel-a", "gray-a", "gateway", "zh-CN",
+                "9223372036854775805", "integration:access", "7");
         RpcContext.getClientAttachment().setAttachment(DubboContextAttachments.REQUEST_ID, "parent-request");
         RpcContext.getClientAttachment().setAttachment("untrusted", "保留但不由上下文组件处理");
 
@@ -53,6 +55,11 @@ class DubboContextFilterTest {
                 assertEquals("operator", current.get(DubboContextAttachments.PRINCIPAL_NAME));
                 assertEquals("9223372036854775807", current.get(DubboContextAttachments.TENANT_ID));
                 assertEquals("9223372036854775806", current.get(DubboContextAttachments.USER_ID));
+                assertEquals("CLIENT", current.get(DubboContextAttachments.SUBJECT_TYPE));
+                assertEquals("channel-a", current.get(DubboContextAttachments.CLIENT_ID));
+                assertEquals("9223372036854775805", current.get(DubboContextAttachments.OWNER_ACCOUNT_ID));
+                assertEquals("integration:access", current.get(DubboContextAttachments.AUTHORIZED_SCOPE));
+                assertEquals("7", current.get(DubboContextAttachments.CREDENTIAL_VERSION));
                 assertEquals("gray-a", current.get(DubboContextAttachments.GRAY_TAG));
                 assertEquals("gateway", current.get(DubboContextAttachments.SOURCE));
                 assertEquals("zh-CN", current.get(DubboContextAttachments.LOCALE));
@@ -101,6 +108,9 @@ class DubboContextFilterTest {
         RequestContext parent = context("parent", null, null, null, null, null, null);
         RpcContext.getServerAttachment().setAttachment(DubboContextAttachments.REQUEST_ID, "request-2");
         RpcContext.getServerAttachment().setAttachment(DubboContextAttachments.TENANT_ID, "tenant-2");
+        RpcContext.getServerAttachment().setAttachment(DubboContextAttachments.OWNER_ACCOUNT_ID, "owner-2");
+        RpcContext.getServerAttachment().setAttachment(DubboContextAttachments.AUTHORIZED_SCOPE, "integration:access");
+        RpcContext.getServerAttachment().setAttachment(DubboContextAttachments.CREDENTIAL_VERSION, "8");
         RpcContext.getServerAttachment().setAttachment("untrusted", "不读取");
         AtomicReference<RequestContext> captured = new AtomicReference<>();
 
@@ -112,6 +122,9 @@ class DubboContextFilterTest {
 
         assertEquals("request-2", captured.get().requestId());
         assertEquals("tenant-2", captured.get().tenantId());
+        assertEquals("owner-2", captured.get().ownerAccountId());
+        assertEquals("integration:access", captured.get().authorizedScope());
+        assertEquals("8", captured.get().credentialVersion());
         assertNull(captured.get().userId());
     }
 

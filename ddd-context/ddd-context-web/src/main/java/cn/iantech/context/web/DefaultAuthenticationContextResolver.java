@@ -16,6 +16,6 @@ public final class DefaultAuthenticationContextResolver implements Authenticatio
         if (principalName == null) {
             return ResolvedAuthenticationContext.empty();
         }
-        return new ResolvedAuthenticationContext(principalName, null, null);
+        return new ResolvedAuthenticationContext(principalName, null, null, null, null, null);
     }
 }

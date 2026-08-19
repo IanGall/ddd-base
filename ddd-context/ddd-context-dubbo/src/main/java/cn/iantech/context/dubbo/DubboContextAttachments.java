@@ -25,6 +25,9 @@ public final class DubboContextAttachments {
     public static final String USER_ID = ContextKeys.USER_ID;
     public static final String SUBJECT_TYPE = ContextKeys.SUBJECT_TYPE;
     public static final String CLIENT_ID = ContextKeys.CLIENT_ID;
+    public static final String OWNER_ACCOUNT_ID = ContextKeys.OWNER_ACCOUNT_ID;
+    public static final String AUTHORIZED_SCOPE = ContextKeys.AUTHORIZED_SCOPE;
+    public static final String CREDENTIAL_VERSION = ContextKeys.CREDENTIAL_VERSION;
     public static final String GRAY_TAG = ContextKeys.GRAY_TAG;
     public static final String SOURCE = ContextKeys.SOURCE;
     public static final String LOCALE = ContextKeys.LOCALE;
@@ -36,6 +39,9 @@ public final class DubboContextAttachments {
             new Binding(USER_ID, RequestContext::userId, ContextValidator::validOrNull),
             new Binding(SUBJECT_TYPE, RequestContext::subjectType, ContextValidator::validOrNull),
             new Binding(CLIENT_ID, RequestContext::clientId, ContextValidator::validOrNull),
+            new Binding(OWNER_ACCOUNT_ID, RequestContext::ownerAccountId, ContextValidator::validOrNull),
+            new Binding(AUTHORIZED_SCOPE, RequestContext::authorizedScope, ContextValidator::validOrNull),
+            new Binding(CREDENTIAL_VERSION, RequestContext::credentialVersion, ContextValidator::validOrNull),
             new Binding(GRAY_TAG, RequestContext::grayTag, ContextValidator::validOrNull),
             new Binding(SOURCE, RequestContext::source, ContextValidator::validOrNull),
             new Binding(LOCALE, RequestContext::locale, ContextValidator::validLocaleOrNull)
@@ -65,7 +71,10 @@ public final class DubboContextAttachments {
                 read(attachment, CLIENT_ID),
                 read(attachment, GRAY_TAG),
                 read(attachment, SOURCE),
-                read(attachment, LOCALE)
+                read(attachment, LOCALE),
+                read(attachment, OWNER_ACCOUNT_ID),
+                read(attachment, AUTHORIZED_SCOPE),
+                read(attachment, CREDENTIAL_VERSION)
         );
     }
 

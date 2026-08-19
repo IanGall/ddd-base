@@ -41,6 +41,9 @@ class ContextWebFilterTest {
         request.addHeader(ContextWebFilter.REQUEST_ID_HEADER, "request-001");
         request.addHeader("X-User-Id", "forged-user");
         request.addHeader("X-Tenant-Id", "forged-tenant");
+        request.addHeader("X-Owner-Account-Id", "forged-owner");
+        request.addHeader("X-Authorized-Scope", "forged-scope");
+        request.addHeader("X-Credential-Version", "forged-version");
         MockHttpServletResponse response = new MockHttpServletResponse();
         AtomicReference<RequestContext> captured = new AtomicReference<>();
 
@@ -52,6 +55,9 @@ class ContextWebFilterTest {
         assertEquals("gateway", captured.get().source());
         assertNull(captured.get().userId());
         assertNull(captured.get().tenantId());
+        assertNull(captured.get().ownerAccountId());
+        assertNull(captured.get().authorizedScope());
+        assertNull(captured.get().credentialVersion());
         assertEquals("request-001", response.getHeader(ContextWebFilter.REQUEST_ID_HEADER));
         assertFalse(ContextAccessor.current().isPresent());
     }
@@ -77,7 +83,9 @@ class ContextWebFilterTest {
     @Test
     void shouldUseResolverTenantAndIgnoreForgedTenantHeader() throws Exception {
         ContextWebFilter configuredFilter = new ContextWebFilter(authentication ->
-                new ResolvedAuthenticationContext("operator", "9223372036854775807", "9223372036854775806"));
+                new ResolvedAuthenticationContext(
+                        "operator", "9223372036854775807", "9223372036854775806",
+                        "9223372036854775805", "integration:access", "7"));
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("X-Tenant-Id", "9999");
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -89,6 +97,9 @@ class ContextWebFilterTest {
         assertEquals("operator", captured.get().principalName());
         assertEquals("9223372036854775807", captured.get().tenantId());
         assertEquals("9223372036854775806", captured.get().userId());
+        assertEquals("9223372036854775805", captured.get().ownerAccountId());
+        assertEquals("integration:access", captured.get().authorizedScope());
+        assertEquals("7", captured.get().credentialVersion());
     }
 
     // 验证未登录请求不会被误识别为可信主体
@@ -101,6 +112,9 @@ class ContextWebFilterTest {
         assertNull(resolved.principalName());
         assertNull(resolved.tenantId());
         assertNull(resolved.userId());
+        assertNull(resolved.ownerAccountId());
+        assertNull(resolved.authorizedScope());
+        assertNull(resolved.credentialVersion());
     }
 
     // 验证非法登录 ID 不会进入请求上下文

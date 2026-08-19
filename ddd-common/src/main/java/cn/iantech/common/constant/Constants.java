@@ -29,6 +29,8 @@ public class Constants {
         RPC_ERROR("RPC_ERROR", "下游服务调用失败", 502),
         RPC_NO_PROVIDER("RPC_NO_PROVIDER", "下游服务暂无可用提供者", 503),
         RPC_TIMEOUT("RPC_TIMEOUT", "下游服务调用超时", 504),
+        NOT_FOUND("NOT_FOUND", "资源不存在", 404),
+        CONFLICT("CONFLICT", "资源状态冲突", 409),
         ;
 
         private static final Map<String, ResponseCode> BY_CODE = Arrays.stream(values())

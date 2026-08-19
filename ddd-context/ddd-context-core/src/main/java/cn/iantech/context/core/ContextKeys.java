@@ -9,6 +9,9 @@ public final class ContextKeys {
     public static final String USER_ID = "x-ctx-user-id";
     public static final String SUBJECT_TYPE = "x-ctx-subject-type";
     public static final String CLIENT_ID = "x-ctx-client-id";
+    public static final String OWNER_ACCOUNT_ID = "x-ctx-owner-account-id";
+    public static final String AUTHORIZED_SCOPE = "x-ctx-authorized-scope";
+    public static final String CREDENTIAL_VERSION = "x-ctx-credential-version";
     public static final String GRAY_TAG = "x-ctx-gray-tag";
     public static final String SOURCE = "x-ctx-source";
     public static final String LOCALE = "x-ctx-locale";
