@@ -49,6 +49,8 @@ public final class ContextWebFilter extends OncePerRequestFilter {
                 resolved.tenantId(),
                 resolved.userId(),
                 null,
+                null,
+                null,
                 "gateway",
                 null);
 

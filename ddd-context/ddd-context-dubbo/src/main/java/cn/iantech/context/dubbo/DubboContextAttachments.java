@@ -1,8 +1,8 @@
 package cn.iantech.context.dubbo;
 
-import cn.iantech.context.core.RequestContext;
 import cn.iantech.context.core.ContextKeys;
 import cn.iantech.context.core.ContextValidator;
+import cn.iantech.context.core.RequestContext;
 import org.apache.dubbo.rpc.RpcContextAttachment;
 
 import java.util.LinkedHashMap;
@@ -23,6 +23,8 @@ public final class DubboContextAttachments {
     public static final String PRINCIPAL_NAME = ContextKeys.PRINCIPAL_NAME;
     public static final String TENANT_ID = ContextKeys.TENANT_ID;
     public static final String USER_ID = ContextKeys.USER_ID;
+    public static final String SUBJECT_TYPE = ContextKeys.SUBJECT_TYPE;
+    public static final String CLIENT_ID = ContextKeys.CLIENT_ID;
     public static final String GRAY_TAG = ContextKeys.GRAY_TAG;
     public static final String SOURCE = ContextKeys.SOURCE;
     public static final String LOCALE = ContextKeys.LOCALE;
@@ -32,6 +34,8 @@ public final class DubboContextAttachments {
             new Binding(PRINCIPAL_NAME, RequestContext::principalName, ContextValidator::validOrNull),
             new Binding(TENANT_ID, RequestContext::tenantId, ContextValidator::validOrNull),
             new Binding(USER_ID, RequestContext::userId, ContextValidator::validOrNull),
+            new Binding(SUBJECT_TYPE, RequestContext::subjectType, ContextValidator::validOrNull),
+            new Binding(CLIENT_ID, RequestContext::clientId, ContextValidator::validOrNull),
             new Binding(GRAY_TAG, RequestContext::grayTag, ContextValidator::validOrNull),
             new Binding(SOURCE, RequestContext::source, ContextValidator::validOrNull),
             new Binding(LOCALE, RequestContext::locale, ContextValidator::validLocaleOrNull)
@@ -57,6 +61,8 @@ public final class DubboContextAttachments {
                 read(attachment, PRINCIPAL_NAME),
                 read(attachment, TENANT_ID),
                 read(attachment, USER_ID),
+                read(attachment, SUBJECT_TYPE),
+                read(attachment, CLIENT_ID),
                 read(attachment, GRAY_TAG),
                 read(attachment, SOURCE),
                 read(attachment, LOCALE)
