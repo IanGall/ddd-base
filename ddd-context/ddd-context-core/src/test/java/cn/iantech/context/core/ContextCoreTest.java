@@ -55,10 +55,10 @@ class ContextCoreTest {
     void shouldNormalizeChannelCredentialContextFields() {
         RequestContext context = new RequestContext(
                 "request-1", null, null, null, "CLIENT", "channel-a",
-                null, "gateway", null, " 9223372036854775807 ", "integration:access", " 12 ");
+                null, "gateway", null, " 9223372036854775807 ", "external:access", " 12 ");
 
         assertEquals("9223372036854775807", context.ownerAccountId());
-        assertEquals("integration:access", context.authorizedScope());
+        assertEquals("external:access", context.authorizedScope());
         assertEquals("12", context.credentialVersion());
 
         RequestContext invalid = new RequestContext(

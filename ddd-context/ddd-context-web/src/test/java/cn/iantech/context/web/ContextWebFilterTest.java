@@ -85,7 +85,7 @@ class ContextWebFilterTest {
         ContextWebFilter configuredFilter = new ContextWebFilter(authentication ->
                 new ResolvedAuthenticationContext(
                         "operator", "9223372036854775807", "9223372036854775806",
-                        "9223372036854775805", "integration:access", "7"));
+                        "9223372036854775805", "external:access", "7"));
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("X-Tenant-Id", "9999");
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -98,7 +98,7 @@ class ContextWebFilterTest {
         assertEquals("9223372036854775807", captured.get().tenantId());
         assertEquals("9223372036854775806", captured.get().userId());
         assertEquals("9223372036854775805", captured.get().ownerAccountId());
-        assertEquals("integration:access", captured.get().authorizedScope());
+        assertEquals("external:access", captured.get().authorizedScope());
         assertEquals("7", captured.get().credentialVersion());
     }
 
