@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -190,9 +191,9 @@ class DubboContextFilterTest {
 
     private static final class CapturingInvoker implements Invoker<Object> {
 
-        private final java.util.function.Consumer<Map<String, String>> assertion;
+        private final Consumer<Map<String, String>> assertion;
 
-        private CapturingInvoker(java.util.function.Consumer<Map<String, String>> assertion) {
+        private CapturingInvoker(Consumer<Map<String, String>> assertion) {
             this.assertion = assertion;
         }
 
