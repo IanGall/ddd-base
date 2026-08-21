@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 @AutoConfigureAfter(name = {
-        "org.redisson.spring.starter.RedissonAutoConfigurationV2",
         "org.redisson.spring.starter.RedissonAutoConfigurationV4"
 })
 @ConditionalOnClass(RedissonClient.class)
