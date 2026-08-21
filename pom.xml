@@ -44,6 +44,7 @@
     <modules>
         <module>ddd-common</module>
         <module>ddd-context</module>
+        <module>ddd-redis-starter</module>
         <module>ddd-dependencies</module>
         <module>ddd-base-bom</module>
     </modules>

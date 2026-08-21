@@ -49,6 +49,11 @@
                 <artifactId>ddd-context-web</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>cn.iantech</groupId>
+                <artifactId>ddd-redis-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
