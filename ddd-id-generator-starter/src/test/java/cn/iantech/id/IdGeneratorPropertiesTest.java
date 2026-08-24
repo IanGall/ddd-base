@@ -14,7 +14,7 @@ class IdGeneratorPropertiesTest {
         IdGeneratorProperties properties = new IdGeneratorProperties();
 
         assertThat(properties.isEnabled()).isTrue();
-        assertThat(properties.getNamespace()).isEqualTo("ddd:id-generator");
+        assertThat(properties.getNamespace()).isEqualTo("ddd-global-id");
         assertThat(properties.getWorkerIdBitLength()).isEqualTo(10);
         assertThat(properties.getSequenceBitLength()).isEqualTo(12);
         assertThat(properties.getLeaseDuration()).isEqualTo(Duration.ofSeconds(30));
@@ -26,6 +26,16 @@ class IdGeneratorPropertiesTest {
     void shouldRejectInvalidNamespace() {
         IdGeneratorProperties properties = new IdGeneratorProperties();
         properties.setNamespace("ddd:{invalid}");
+
+        assertThatThrownBy(properties::validate)
+                .isInstanceOf(IdGenerationException.class)
+                .hasMessageContaining("namespace");
+    }
+
+    @Test
+    void shouldRejectNamespaceContainingColon() {
+        IdGeneratorProperties properties = new IdGeneratorProperties();
+        properties.setNamespace("ddd:id-generator");
 
         assertThatThrownBy(properties::validate)
                 .isInstanceOf(IdGenerationException.class)

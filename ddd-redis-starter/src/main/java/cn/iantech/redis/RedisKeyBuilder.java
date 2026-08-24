@@ -14,8 +14,8 @@ public final class RedisKeyBuilder {
     /**
      * 创建用户 Key 作用域。
      */
-    public static RedisKeyScope scope(String userType, long userId) {
-        return new RedisKeyScope(userType, userId);
+    public static RedisKeyScope scope(long userId) {
+        return new RedisKeyScope(userId);
     }
 
     /**

@@ -11,7 +11,7 @@ import java.time.Duration;
 public class IdGeneratorProperties {
 
     private boolean enabled = true;
-    private String namespace = "ddd:id-generator";
+    private String namespace = "ddd-global-id";
     private int workerIdBitLength = 10;
     private int sequenceBitLength = 12;
     private Duration leaseDuration = Duration.ofSeconds(30);
@@ -68,6 +68,7 @@ public class IdGeneratorProperties {
     void validate() {
         if (namespace == null || namespace.isBlank() || !namespace.equals(namespace.trim())
                 || namespace.indexOf('{') >= 0 || namespace.indexOf('}') >= 0
+                || namespace.indexOf(':') >= 0
                 || namespace.chars().anyMatch(Character::isWhitespace)) {
             throw new IdGenerationException("ddd.id-generator.namespace 非法");
         }

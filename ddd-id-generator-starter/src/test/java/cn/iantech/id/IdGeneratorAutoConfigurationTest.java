@@ -28,13 +28,13 @@ class IdGeneratorAutoConfigurationTest {
 
         contextRunner.withBean(IRedisService.class, () -> redisService)
                 .withPropertyValues(
-                        "ddd.id-generator.namespace=service:id",
+                        "ddd.id-generator.namespace=service-id",
                         "ddd.id-generator.worker-id-bit-length=9",
                         "ddd.id-generator.sequence-bit-length=13")
                 .run(context -> {
                     assertThat(context).hasSingleBean(GlobalIdGenerator.class);
                     assertThat(context.getBean(GlobalIdGenerator.class).nextId()).isPositive();
-                    assertThat(context.getBean(IdGeneratorProperties.class).getNamespace()).isEqualTo("service:id");
+                    assertThat(context.getBean(IdGeneratorProperties.class).getNamespace()).isEqualTo("service-id");
                 });
     }
 

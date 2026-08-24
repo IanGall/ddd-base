@@ -46,7 +46,12 @@ class RedisWorkerLeaseTest {
                 scriptCaptor.capture(), keysCaptor.capture(), argumentsCaptor.capture());
         assertThat(scriptCaptor.getValue()).contains("'SET', leaseKey, owner, 'NX', 'PX', leaseMillis");
         assertThat(keysCaptor.getValue()).hasSize(1026)
-                .allMatch(key -> key.startsWith("{ddd:id-generator}:worker:"));
+                .allMatch(key -> key.startsWith("{ddd-global-id}:worker:"));
+        assertThat(keysCaptor.getValue()).contains(
+                "{ddd-global-id}:worker:cursor",
+                "{ddd-global-id}:worker:layout",
+                "{ddd-global-id}:worker:lease:0",
+                "{ddd-global-id}:worker:lease:1023");
         assertThat(argumentsCaptor.getValue()).isEqualTo(List.of(1024, 100L, "instance-a", "10:12"));
     }
 
@@ -67,7 +72,7 @@ class RedisWorkerLeaseTest {
         assertThat(scriptCaptor.getAllValues().get(1)).contains("'GET', KEYS[1]", "'PEXPIRE'");
         assertThat(scriptCaptor.getAllValues().get(2)).contains("'GET', KEYS[1]", "'DEL'");
         assertThat(keysCaptor.getAllValues().get(1))
-                .containsExactly("{ddd:id-generator}:worker:lease:3");
+                .containsExactly("{ddd-global-id}:worker:lease:3");
         assertThat(argumentsCaptor.getAllValues().get(1)).isEqualTo(List.of("instance-a", 100L));
         assertThat(argumentsCaptor.getAllValues().get(2)).isEqualTo(List.of("instance-a"));
     }

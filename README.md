@@ -67,6 +67,9 @@ mvn verify
 Starter 在容器中存在 `RedissonClient` 时自动提供 `cn.iantech.redis.IRedisService`。业务可以声明自己的
 `IRedisService` Bean 覆盖默认实现；公共接口不会暴露 Redisson 的锁、队列、脚本等客户端类型。
 
+需要将同一全局用户的多个 Key 固定到一个 Redis Cluster slot 时，使用 `RedisKeyBuilder.scope(userId)`。生成的 Hash Tag 为
+`{userId}`；业务不得自行拼接花括号，也不得把非全局唯一的局部 ID 用作用户作用域。
+
 ### 全局唯一 ID
 
 需要全局唯一 ID 的微服务依赖公共 Starter。版本已经由 `ddd-base-bom` 管理，下游不得重复声明：
@@ -85,7 +88,7 @@ Starter 复用应用现有的 `RedissonClient`，通过 Redis 租约在同一命
 ddd:
   id-generator:
     enabled: true
-    namespace: ddd:id-generator
+    namespace: ddd-global-id
     worker-id-bit-length: 10
     sequence-bit-length: 12
     lease-duration: 30s
@@ -114,7 +117,10 @@ public class OrderIdService {
 配置约束：
 
 - `worker-id-bit-length` 默认使用 10 位，可在同一 `namespace` 下同时租用最多 1024 个 WorkerId。
-- `worker-id-bit-length` 与 `sequence-bit-length` 之和不得超过 22；默认 10/12 用满可用位数，在实例容量与单实例吞吐之间取得平衡。
+- `namespace` 不能包含空白、花括号或冒号。默认 Redis Key 使用 `{ddd-global-id}:worker:cursor`、
+  `{ddd-global-id}:worker:layout` 和 `{ddd-global-id}:worker:lease:<workerId>` 格式；花括号内的 namespace 作为 Redis
+  Cluster Hash Tag，确保租约脚本涉及的 Key 位于同一 Slot。
+- `worker-id-bit-length` 与 `sequence-bit-length` 之和必须等于 22；默认 10/12 用满可用位数，在实例容量与单实例吞吐之间取得平衡。
 - `renew-interval` 必须小于 `lease-duration`。实例会在租约有效期内续约，正常关闭时主动释放 WorkerId。
 - 所有需要保证 ID 全局唯一的实例必须连接同一个 Redis，并使用相同的 `namespace` 和位长配置。不同系统应使用不同
   `namespace`，避免互相占用 WorkerId。
