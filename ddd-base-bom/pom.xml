@@ -54,6 +54,11 @@
                 <artifactId>ddd-redis-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>cn.iantech</groupId>
+                <artifactId>ddd-id-generator-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
