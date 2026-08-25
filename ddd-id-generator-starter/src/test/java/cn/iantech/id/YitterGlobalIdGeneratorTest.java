@@ -68,4 +68,24 @@ class YitterGlobalIdGeneratorTest {
 
         assertThatThrownBy(generator::nextId).isInstanceOf(IdGenerationException.class);
     }
+
+    @Test
+    void shouldWrapDelegateFailureAndCloseOnlyOnce() {
+        when(redisService.executeLongScript(anyString(), anyList(), anyList())).thenReturn(7L, 1L);
+        RedisWorkerLease lease = new RedisWorkerLease(redisService, properties, nanoTime::get, "instance-a");
+        IIdGenerator delegate = () -> {
+            throw new IllegalStateException("生成失败");
+        };
+        ScheduledExecutorService executor = mock(ScheduledExecutorService.class);
+        YitterGlobalIdGenerator generator = new YitterGlobalIdGenerator(lease, delegate, executor, 30L);
+
+        assertThatThrownBy(generator::nextId)
+                .isInstanceOf(IdGenerationException.class)
+                .hasMessageContaining("生成 ID 失败")
+                .hasCauseInstanceOf(IllegalStateException.class);
+
+        generator.close();
+        generator.close();
+        verify(executor).shutdownNow();
+    }
 }
