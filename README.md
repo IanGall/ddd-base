@@ -4,18 +4,20 @@
 
 ## 模块说明
 
-| 模块                            | 产物     | 职责                                                 |
-|---------------------------------|----------|------------------------------------------------------|
-| `ddd-common`                    | JAR      | 提供通用响应、分页模型、持久化基类、常量和应用异常   |
-| `ddd-context`                   | 聚合 POM | 聚合协议无关上下文及其边界适配器，不作为业务依赖引入 |
-| `ddd-context/ddd-context-core`  | JAR      | 提供协议无关的请求上下文、访问器、作用域和快照能力   |
-| `ddd-context/ddd-context-dubbo` | JAR      | 在 Dubbo 3 Attachment 与请求上下文之间进行转换       |
-| `ddd-context/ddd-context-web`   | JAR      | 在 Spring Web 请求边界建立、回写并清理请求上下文     |
-| `ddd-redis-starter`             | JAR      | 提供技术无关的 Redis API、Redisson 实现与自动装配    |
-| `ddd-id-generator-starter`      | JAR      | 基于 Redis 租约分配机器号并生成全局唯一的 64 位 ID   |
-| `ddd-test-starter`              | JAR      | 检测 SQL/RPC N+1 并编排强类型多接口业务流程          |
-| `ddd-dependencies`              | BOM      | 统一第三方依赖版本，供基础 BOM 导入                  |
-| `ddd-base-bom`                  | BOM      | 汇总第三方依赖版本及基础组件版本                     |
+| 模块                                | 产物     | 职责                                                 |
+|-------------------------------------|----------|------------------------------------------------------|
+| `ddd-common`                        | JAR      | 提供通用响应、分页模型、持久化基类、常量和应用异常   |
+| `ddd-context`                       | 聚合 POM | 聚合协议无关上下文及其边界适配器，不作为业务依赖引入 |
+| `ddd-context/ddd-context-core`      | JAR      | 提供协议无关的请求上下文、访问器、作用域和快照能力   |
+| `ddd-context/ddd-context-dubbo`     | JAR      | 在 Dubbo 3 Attachment 与请求上下文之间进行转换       |
+| `ddd-context/ddd-context-web`       | JAR      | 在 Spring Web 请求边界建立、回写并清理请求上下文     |
+| `ddd-redis-starter`                 | JAR      | 提供技术无关的 Redis API、Redisson 实现与自动装配    |
+| `ddd-id-generator-starter`          | JAR      | 基于 Redis 租约分配机器号并生成全局唯一的 64 位 ID   |
+| `ddd-test`                          | 聚合 POM | 聚合业务服务与网关的测试 Starter，不作为业务依赖引入 |
+| `ddd-test/ddd-test-starter`         | JAR      | 检测业务服务中的 SQL/Dubbo N+1                       |
+| `ddd-test/ddd-gateway-test-starter` | JAR      | 在网关层编排强类型 Feign 多接口业务流程              |
+| `ddd-dependencies`                  | BOM      | 统一第三方依赖版本，供基础 BOM 导入                  |
+| `ddd-base-bom`                      | BOM      | 汇总第三方依赖版本及基础组件版本                     |
 
 ## 构建要求
 
@@ -133,39 +135,47 @@ public class OrderIdService {
 
 ### 测试 Starter
 
-业务工程只在测试范围引入公共测试底座：
+业务服务只在测试范围引入 N+1 检测底座：
 
 ```xml
-
 <dependency>
-  <groupId>cn.iantech</groupId>
-  <artifactId>ddd-test-starter</artifactId>
-  <scope>test</scope>
+    <groupId>cn.iantech</groupId>
+    <artifactId>ddd-test-starter</artifactId>
+    <scope>test</scope>
 </dependency>
 ```
 
-在 Spring 集成测试上声明查询和远程调用预算。Starter 会代理已有 `DataSource`，并统计同一 JVM 中发生的 SELECT、Feign 和 Dubbo
+在 Spring 集成测试上声明查询和远程调用预算。Starter 会代理已有 `DataSource`，并统计同一 JVM 中发生的 SELECT 和 Dubbo
 Consumer 调用：
 
 ```java
-
 @Test
 @DetectNPlusOne(maxSelects = 2, maxRepeatedSelects = 1,
         maxRemoteCalls = 3, maxRepeatedRemoteCalls = 1)
 void shouldQueryOrderWithoutNPlusOne() {
-  orderService.queryOrders();
+    orderService.queryOrders();
 }
 ```
 
-多接口自动化流程使用 OpenFeign 接口和 DTO，不使用 `Map` 传输数据。`URI` 可以指向本地随机端口或远程测试环境：
+业务流程测试只允许在网关层编写。网关测试改为引入组合 Starter，它依赖上述 N+1 检测能力并增加强类型 Feign 流程 DSL：
+
+```xml
+<dependency>
+    <groupId>cn.iantech</groupId>
+    <artifactId>ddd-gateway-test-starter</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+流程接口必须使用 OpenFeign 和 DTO，不使用 `Map` 传输数据。`URI` 可以指向网关随机端口或远程测试环境：
 
 ```java
 interface OrderApi {
-  @RequestLine("POST /api/login")
-  LoginResponse login(LoginRequest request);
+    @RequestLine("POST /api/login")
+    LoginResponse login(LoginRequest request);
 
-  @RequestLine("GET /api/orders/{id}")
-  OrderResponse query(@Param("id") String id);
+    @RequestLine("GET /api/orders/{id}")
+    OrderResponse query(@Param("id") String id);
 }
 
 OrderApi api = FeignTestClientFactory.create(OrderApi.class, URI.create(baseUrl));
@@ -176,12 +186,9 @@ BusinessFlow flow = BusinessFlow.builder("订单流程")
         .then("查询订单", context -> assertNotNull(api.query(orderId)))
         .build();
 
-new
-
-BusinessFlowRunner().
-
-run(flow);
+new BusinessFlowRunner().run(flow);
 ```
 
-流程严格按顺序执行，失败后停止后续步骤且不自动重试。远程黑盒测试只能观察测试进程发出的 Feign 调用，不能读取未安装该 Starter
-的远端服务内部 SQL 或 Dubbo 调用。
+流程严格按顺序执行，失败后停止后续步骤且不自动重试。标准服务和标准服务 Archetype 不依赖
+`ddd-gateway-test-starter`，从依赖层面阻止在 Provider 内编排 HTTP 业务流程。远程黑盒测试只能观察测试进程发出的 Feign 调用，
+不能读取远端服务内部 SQL 或 Dubbo 调用。
