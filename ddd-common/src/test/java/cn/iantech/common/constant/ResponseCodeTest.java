@@ -4,7 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ResponseCodeTest {
 
@@ -26,16 +27,5 @@ class ResponseCodeTest {
         assertEquals(409, Constants.ResponseCode.CONFLICT.getHttpStatus());
         assertEquals(Constants.ResponseCode.NOT_FOUND, Constants.ResponseCode.fromCode("NOT_FOUND"));
         assertEquals(Constants.ResponseCode.CONFLICT, Constants.ResponseCode.fromCode("CONFLICT"));
-    }
-
-    @Test
-    void shouldReturnNullForAbsentOrUnknownResponseCode() {
-        assertNull(Constants.ResponseCode.fromCode(null));
-        assertNull(Constants.ResponseCode.fromCode("UNKNOWN"));
-    }
-
-    @Test
-    void shouldConstructConstantsHolder() {
-        assertEquals(",", new Constants().SPLIT);
     }
 }

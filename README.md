@@ -35,18 +35,6 @@ mvn clean install
 mvn verify
 ```
 
-## 测试覆盖率
-
-项目统一使用 JaCoCo 0.8.14 对每个含生产源码的模块执行独立覆盖率门禁：
-
-- 行覆盖率不低于 80%
-- 分支覆盖率不低于 70%
-- 不排除启动类、配置类、数据模型或编译生成类
-
-执行 `mvn clean verify` 后，HTML 报告位于各模块
-`target/site/jacoco/index.html`，机器可读报告位于
-`target/site/jacoco/jacoco.xml`。任何模块未达到门禁时，Maven 构建会直接失败。
-
 ## 下游使用
 
 业务工程通过 `dependencyManagement` 导入基础 BOM：

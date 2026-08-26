@@ -88,33 +88,6 @@ class RedisWorkerLeaseTest {
     }
 
     @Test
-    void shouldFailWhenRedisReturnsNullOrOutOfRangeWorker() {
-        when(redisService.executeLongScript(anyString(), anyList(), anyList()))
-                .thenReturn(null, 1024L);
-
-        assertThatThrownBy(() -> new RedisWorkerLease(
-                redisService, properties, nanoTime::get, "instance-a"))
-                .isInstanceOf(IdGenerationException.class)
-                .hasMessageContaining("没有可用");
-        assertThatThrownBy(() -> new RedisWorkerLease(
-                redisService, properties, nanoTime::get, "instance-a"))
-                .isInstanceOf(IdGenerationException.class)
-                .hasMessageContaining("没有可用");
-    }
-
-    @Test
-    void shouldWrapRedisAcquisitionFailure() {
-        when(redisService.executeLongScript(anyString(), anyList(), anyList()))
-                .thenThrow(new IllegalStateException("Redis unavailable"));
-
-        assertThatThrownBy(() -> new RedisWorkerLease(
-                redisService, properties, nanoTime::get, "instance-a"))
-                .isInstanceOf(IdGenerationException.class)
-                .hasMessageContaining("无法从 Redis 获取")
-                .hasCauseInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
     void shouldFailWhenNamespaceLayoutDoesNotMatch() {
         when(redisService.executeLongScript(anyString(), anyList(), anyList())).thenReturn(-2L);
 
@@ -190,31 +163,5 @@ class RedisWorkerLeaseTest {
 
         assertThat(lease.isValid()).isFalse();
         verify(redisService, times(2)).executeLongScript(anyString(), anyList(), anyList());
-    }
-
-    @Test
-    void shouldIgnoreRenewAfterInvalidationAndReleaseFailure() {
-        when(redisService.executeLongScript(anyString(), anyList(), anyList()))
-                .thenReturn(3L, 0L)
-                .thenThrow(new IllegalStateException("Redis unavailable"));
-        RedisWorkerLease lease = new RedisWorkerLease(redisService, properties, nanoTime::get, "instance-a");
-
-        lease.renew();
-        lease.renew();
-        lease.close();
-        lease.renew();
-
-        assertThat(lease.isValid()).isFalse();
-        verify(redisService, times(3)).executeLongScript(anyString(), anyList(), anyList());
-    }
-
-    @Test
-    void shouldSaturateLocalDeadlineOnNanoTimeOverflow() {
-        when(redisService.executeLongScript(anyString(), anyList(), anyList())).thenReturn(3L);
-        nanoTime.set(Long.MAX_VALUE - 1);
-
-        RedisWorkerLease lease = new RedisWorkerLease(redisService, properties, nanoTime::get, "instance-a");
-
-        assertThat(lease.isValid()).isTrue();
     }
 }

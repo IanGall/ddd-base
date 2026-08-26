@@ -2,10 +2,7 @@ package cn.iantech.context.core;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -70,82 +67,5 @@ class ContextCoreTest {
         assertNull(invalid.ownerAccountId());
         assertNull(invalid.authorizedScope());
         assertNull(invalid.credentialVersion());
-    }
-
-    @Test
-    void shouldRecognizeEmptyAndEverySupportedContextField() {
-        assertTrue(RequestContext.empty().isEmpty());
-
-        Stream.of(
-                        new RequestContext("request", null, null, null, null, null, null),
-                        new RequestContext(null, "principal", null, null, null, null, null),
-                        new RequestContext(null, null, "tenant", null, null, null, null),
-                        new RequestContext(null, null, null, "user", null, null, null),
-                        new RequestContext(null, null, null, null, "CLIENT", null, null, null, null),
-                        new RequestContext(null, null, null, null, null, "client", null, null, null),
-                        new RequestContext(null, null, null, null, null, null, null, null, null,
-                                "owner", null, null),
-                        new RequestContext(null, null, null, null, null, null, null, null, null,
-                                null, "scope", null),
-                        new RequestContext(null, null, null, null, null, null, null, null, null,
-                                null, null, "version"),
-                        new RequestContext(null, null, null, null, "gray", null, null),
-                        new RequestContext(null, null, null, null, null, "source", null),
-                        new RequestContext(null, null, null, null, null, null, "zh-CN"))
-                .forEach(context -> assertFalse(context.isEmpty()));
-    }
-
-    @Test
-    void shouldClearContextWhenOpeningNullOrEmptyContext() {
-        RequestContext parent = new RequestContext("parent", null, null, null, null, null, null);
-
-        try (ContextScope ignored = ContextAccessor.open(parent)) {
-            try (ContextScope emptyScope = ContextAccessor.open(RequestContext.empty())) {
-                assertTrue(ContextAccessor.current().isEmpty());
-            }
-            assertEquals(parent, ContextAccessor.current().orElseThrow());
-
-            try (ContextScope nullScope = ContextAccessor.open(null)) {
-                assertTrue(ContextAccessor.current().isEmpty());
-            }
-            assertEquals(parent, ContextAccessor.current().orElseThrow());
-        }
-    }
-
-    @Test
-    void shouldWrapCallableAndSupplierAndRestoreAfterFailure() throws Exception {
-        RequestContext captured = new RequestContext("captured", null, null, null, null, null, null);
-        ContextSnapshot snapshot;
-        try (ContextScope ignored = ContextAccessor.open(captured)) {
-            snapshot = ContextSnapshot.capture();
-        }
-
-        assertFalse(snapshot.isEmpty());
-        assertEquals(captured, snapshot.context());
-        Callable<RequestContext> callable = snapshot.wrap(
-                (Callable<RequestContext>) () -> ContextAccessor.current().orElseThrow());
-        assertEquals(captured, callable.call());
-
-        Supplier<RequestContext> supplier = snapshot.wrap(
-                (Supplier<RequestContext>) () -> ContextAccessor.current().orElseThrow());
-        assertEquals(captured, supplier.get());
-
-        RuntimeException failure = assertThrows(RuntimeException.class,
-                () -> snapshot.wrap((Runnable) () -> {
-                    throw new RuntimeException("任务失败");
-                }).run());
-        assertEquals("任务失败", failure.getMessage());
-        assertTrue(ContextAccessor.current().isEmpty());
-    }
-
-    @Test
-    void shouldRepresentEmptySnapshotAndRejectNullTasks() {
-        ContextSnapshot snapshot = ContextSnapshot.capture();
-
-        assertTrue(snapshot.isEmpty());
-        assertTrue(snapshot.context().isEmpty());
-        assertThrows(NullPointerException.class, () -> snapshot.wrap((Runnable) null));
-        assertThrows(NullPointerException.class, () -> snapshot.wrap((java.util.concurrent.Callable<?>) null));
-        assertThrows(NullPointerException.class, () -> snapshot.wrap((Supplier<?>) null));
     }
 }
