@@ -64,11 +64,6 @@
                 <artifactId>ddd-test-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>cn.iantech</groupId>
-                <artifactId>ddd-gateway-test-starter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
