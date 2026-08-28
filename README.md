@@ -13,7 +13,6 @@
 | `ddd-context/ddd-context-web`   | JAR      | 在 Spring Web 请求边界建立、回写并清理请求上下文     |
 | `ddd-redis-starter`             | JAR      | 提供技术无关的 Redis API、Redisson 实现与自动装配    |
 | `ddd-id-generator-starter`      | JAR      | 基于 Redis 租约分配机器号并生成全局唯一的 64 位 ID   |
-| `ddd-test-starter`              | JAR      | 检测 SQL/RPC N+1 并编排强类型多接口业务流程          |
 | `ddd-dependencies`              | BOM      | 统一第三方依赖版本，供基础 BOM 导入                  |
 | `ddd-base-bom`                  | BOM      | 汇总第三方依赖版本及基础组件版本                     |
 
@@ -130,58 +129,3 @@ public class OrderIdService {
 - Redis 不可用、WorkerId 已耗尽、租约丢失或续约失败时，生成器会严格停发并抛出异常，不会退化为本地默认机器号，防止生成 重复
   ID。调用方不得吞掉异常后自行生成替代 ID。
 - 设置 `ddd.id-generator.enabled=false` 会关闭自动装配；关闭后容器中不会提供 `GlobalIdGenerator` Bean。
-
-### 测试 Starter
-
-业务工程只在测试范围引入公共测试底座：
-
-```xml
-
-<dependency>
-  <groupId>cn.iantech</groupId>
-  <artifactId>ddd-test-starter</artifactId>
-  <scope>test</scope>
-</dependency>
-```
-
-在 Spring 集成测试上声明查询和远程调用预算。Starter 会代理已有 `DataSource`，并统计同一 JVM 中发生的 SELECT、Feign 和 Dubbo
-Consumer 调用：
-
-```java
-
-@Test
-@DetectNPlusOne(maxSelects = 2, maxRepeatedSelects = 1,
-        maxRemoteCalls = 3, maxRepeatedRemoteCalls = 1)
-void shouldQueryOrderWithoutNPlusOne() {
-  orderService.queryOrders();
-}
-```
-
-多接口自动化流程使用 OpenFeign 接口和 DTO，不使用 `Map` 传输数据。`URI` 可以指向本地随机端口或远程测试环境：
-
-```java
-interface OrderApi {
-  @RequestLine("POST /api/login")
-  LoginResponse login(LoginRequest request);
-
-  @RequestLine("GET /api/orders/{id}")
-  OrderResponse query(@Param("id") String id);
-}
-
-OrderApi api = FeignTestClientFactory.create(OrderApi.class, URI.create(baseUrl));
-FlowKey<LoginResponse> login = new FlowKey<>("login", LoginResponse.class);
-
-BusinessFlow flow = BusinessFlow.builder("订单流程")
-        .then("登录", context -> context.put(login, api.login(new LoginRequest(username, password))))
-        .then("查询订单", context -> assertNotNull(api.query(orderId)))
-        .build();
-
-new
-
-BusinessFlowRunner().
-
-run(flow);
-```
-
-流程严格按顺序执行，失败后停止后续步骤且不自动重试。远程黑盒测试只能观察测试进程发出的 Feign 调用，不能读取未安装该 Starter
-的远端服务内部 SQL 或 Dubbo 调用。
